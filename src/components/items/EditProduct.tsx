@@ -43,7 +43,6 @@ const EditProduct = ({ Id }: any) => {
 
   useEffect(() => {
     if (Id) {
-      console.log(Id)
       fetchCategories()
       fetchItem()
     }

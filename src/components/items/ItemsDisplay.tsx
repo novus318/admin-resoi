@@ -1,7 +1,7 @@
 'use client'
 import axios from 'axios'
 import { Search } from 'lucide-react'
-import Image from 'next/image'
+import Image from "next/legacy/image"
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import ProductCard from './ProductCard'
@@ -65,7 +65,9 @@ const ItemsDisplay = () => {
     >
       {items.length > 0 ? (
         items.map((item:any)=>
-       <ProductCard item={item}/>
+       <div key={item?._id}>
+        <ProductCard item={item}/>
+       </div>
         )
       ):(
       <div>
