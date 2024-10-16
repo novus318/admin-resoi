@@ -11,7 +11,7 @@ const ItemsDisplay = () => {
   const [items,setItems]=useState([])
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   const [loadingItems, setLoadingItems] = useState(false)
-
+  const [searchQuery, setSearchQuery] = useState('');
   const fetchitems =async()=>{
     try{
       setLoadingItems(true)
@@ -25,14 +25,20 @@ const ItemsDisplay = () => {
       setLoadingItems(false)
     }
   }
-  const filterItems = () => {
-    return items.filter((item:any) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
-  const handleSearch = (e:any) => {
-    setSearchTerm(e.target.value);
-  }
+  const filteredItems = items
+    .filter((item:any) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        item?.name?.toLowerCase().includes(query) ||
+        item?.description?.toLowerCase().includes(query) ||
+        item?.ingredients?.some((ingredient:any) =>
+          ingredient.toLowerCase().includes(query)
+        ) ||
+        item?.category?.name?.toLowerCase().includes(query) ||
+        item?.subcategory?.name?.toLowerCase().includes(query)
+      );
+    })
+
   useEffect(() => {
     fetchitems()
   }, [])
@@ -49,6 +55,8 @@ const ItemsDisplay = () => {
     </Link>
     <div className="w-full md:w-auto flex relative group mt-2 md:mt-0 justify-between md:ml-auto items-center flex-grow h-full rounded-3xl bg-white border">
       <input
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
         className="text-xs pl-4 rounded-3xl p-2.5 focus:outline-none w-full text-cusblack"
         type="text"
         placeholder="Search item"
@@ -63,8 +71,8 @@ const ItemsDisplay = () => {
     <div
       className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6 mt-8`}
     >
-      {items.length > 0 ? (
-        items.map((item:any)=>
+      {filteredItems.length > 0 ? (
+        filteredItems.map((item:any)=>
        <div key={item?._id}>
         <ProductCard item={item}/>
        </div>
