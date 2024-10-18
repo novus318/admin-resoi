@@ -6,14 +6,18 @@ import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import axios from 'axios';
 import { Skeleton } from '../ui/skeleton';
+import { toast } from '@/hooks/use-toast';
+import { Input } from '../ui/input';
 
 const Tablecard = ({ table, fetchTables }: any) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_APP_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
   const qrValue = `${baseUrl}/table/${table?._id}`;
   const [loading, setLoading] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTableName, setEditedTableName] = useState(table?.tableName || '');
+
 
   const downloadCard = (): void => {
     if (!cardRef.current) return; // Ensure cardRef is not null before proceeding
@@ -48,29 +52,38 @@ const Tablecard = ({ table, fetchTables }: any) => {
   };
 
   const handleUpdateTable = async () => {
-    setEditLoading(true);
+    setLoading(true);
     try {
-      await axios.put(`/update-table/${table._id}`, {
-        // Add the data you want to update here
-        tableName: table?.tableName,
+      await axios.put(`${apiUrl}/api/table/update-table/${table._id}`, {
+        tableName: editedTableName,
       });
-      await fetchTables(); // Refresh the list after update
-    } catch (error) {
-      console.error('Failed to update table', error);
+      await fetchTables();
+      toast({
+        title: 'Success',
+        description: 'Table updated successfully',
+        variant: 'default',
+      })
+      setIsEditing(false);
+    } catch (error:any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || error.message || 'Failed to update table',
+        variant: 'destructive',
+      })
     } finally {
-      setEditLoading(false);
+      setLoading(false);
     }
   };
 
   const handleDeleteTable = async () => {
-    setDeleteLoading(true);
+    setLoading(true);
     try {
-      await axios.delete(`/delete-table/${table._id}`);
-      await fetchTables(); // Refresh the list after deletion
+      await axios.delete(`${apiUrl}/api/table/delete-table/${table._id}`);
+      fetchTables();
     } catch (error) {
       console.error('Failed to delete table', error);
     } finally {
-      setDeleteLoading(false);
+      setLoading(false);
     }
   };
 if(loading){
@@ -89,22 +102,43 @@ if(loading){
     <div>
       <Card key={table?._id} className="w-full">
           <CardTitle className="text-2xl font-bold text-center">
-            {table?.tableName}
+          {isEditing ? (
+            <Input
+              value={editedTableName}
+              onChange={(e) => setEditedTableName(e.target.value)}
+              className="text-center"
+            />
+          ) : (
+            table?.tableName
+          )}
           </CardTitle>
-        <CardContent className="flex flex-col items-center p-2">
-      <div className='flex justify-between w-full px-5 mb-2'>
-      <Button size='sm' onClick={handleUpdateTable} disabled={editLoading}>
-              {editLoading ? 'Updating...' : 'Edit'}
-            </Button>
-            <Button
-            size='sm'
-              onClick={handleDeleteTable}
-              disabled={deleteLoading}
-              variant="destructive"
-            >
-              {deleteLoading ? 'Deleting...' : 'Delete'}
-            </Button>
-      </div>
+          <CardContent className="flex flex-col items-center p-2">
+          <div className="flex justify-between w-full px-5 mb-2">
+            {isEditing ? (
+              <>
+                <Button size="sm" onClick={handleUpdateTable} disabled={loading}>
+                  {loading ? 'Saving...' : 'Save'}
+                </Button>
+                <Button size="sm" onClick={() => setIsEditing(false)} disabled={loading}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="sm" onClick={() => setIsEditing(true)} disabled={loading}>
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleDeleteTable}
+                  disabled={loading}
+                  variant="destructive"
+                >
+                  {loading ? 'Deleting...' : 'Delete'}
+                </Button>
+              </>
+            )}
+          </div>
           <div className="mb-4">
             <QRCodeCanvas value={qrValue} size={200} />
           </div>

@@ -3,7 +3,7 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-      domains: ['upload.wikimedia.org','localhost','server.nizamudheen.com','server.vellapmahal.in','vellapmahal.in'],
+      domains: ['upload.wikimedia.org','localhost','server.nizamudheen.com','resoi-server.vercel.app',],
     },
   };
 

@@ -217,7 +217,7 @@ const isWaiter =decryptedRole === 'waiter'
     </div>
 
       {/* Main content area */}
-      <div className="ml-0 md:ml-[20%] w-full md:w-4/5 p-5">
+      <div className="ml-0 md:ml-[20%] w-full md:w-4/5">
         {children}
       </div>
     </div>

@@ -30,6 +30,19 @@ const TableManage = () => {
     }
    }
 
+   const fetchTablesAgain =async()=>{
+    try{
+      const response = await axios.get(`${apiUrl}/api/table/get-tables`);
+      setTables(response.data.tables);
+    }catch(error:any){
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || error.message || 'Failed to fetch tables',
+        variant: 'destructive',
+      });
+    }
+   }
+
    useEffect(()=>{
      fetchTables();
    },[]);
@@ -49,6 +62,7 @@ const TableManage = () => {
           variant: 'default',
         });
         setTableName('');
+        fetchTablesAgain()
       }
     } catch (error: any) {
       toast({
@@ -89,7 +103,7 @@ const TableManage = () => {
           {tables.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {tables.map((table: any, index: number) => (
-                <Tablecard key={table?._id} table={table} fetchTables={fetchTables} />
+                <Tablecard key={table?._id} table={table} fetchTables={fetchTablesAgain} />
               ))}
             </div>
           ) : (

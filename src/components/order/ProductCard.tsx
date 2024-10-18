@@ -1,18 +1,21 @@
-import { formatCurrency } from '@/lib/currencyFormat'
-import Image from "next/legacy/image"
-import Link from 'next/link'
-import React from 'react'
-import { Badge } from '../ui/badge'
+import React from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/currencyFormat";
+import { Badge } from "../ui/badge";
 
-const ProductCard = ({ item }: any) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
- const imageUrl=`${apiUrl}${item?.image}`
+const ProductCard = ({ item }:any) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const imageUrl=`${apiUrl}${item?.image}`
   return (
-<Link href={`/items/edit-items/${item?._id}`}>
-  <div className="rounded-xl cursor-pointer">
+    <div className="rounded-xl cursor-pointer">
     <div className="overflow-hidden cursor-default rounded-xl relative group">
-      <div className="aspect-w-1 aspect-h-1 w-full">
-      <Image
+    <motion.div
+          initial={{ scale: 1.3, x: 50, opacity: 0 }}
+          animate={{ scale: 1, x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        className="aspect-w-1 aspect-h-1 w-full">
+        <Image
           height={700}
           width={700}
           objectFit="cover"
@@ -23,11 +26,11 @@ const ProductCard = ({ item }: any) => {
         />
         {/* Offer Badge */}
         {item?.offer > 0 && (
-        <Badge variant='destructive' className='absolute top-2 left-2'>
+        <Badge variant='destructive' className='absolute top-1 left-1 rounded-lg'>
             {item.offer}% OFF
           </Badge>
         )}
-      </div>
+      </motion.div>
     </div>
     <div className="px-2 py-2">
       <p className="text-sm line-clamp-1">{item?.name}</p>
@@ -35,12 +38,12 @@ const ProductCard = ({ item }: any) => {
   {item?.price ? (
     <>
       {item?.offer > 0 ? (
-        <div className='flex gap-2'>
-          <p className="text-sm font-semibold line-through text-red-500">
-            {formatCurrency(item?.price)}
-          </p>
+        <div className='flex gap-1 items-end'>
           <p className="text-sm font-semibold">
             {formatCurrency(item?.price - (item.price * (item.offer / 100)))}
+          </p>
+          <p className="text-xs font-semibold line-through text-red-500">
+            {formatCurrency(item?.price)}
           </p>
         </div>
       ) : (
@@ -61,18 +64,18 @@ const ProductCard = ({ item }: any) => {
           const discountedPrice = originalPrice - discount;
 
           return (
-            <div className='flex gap-2'>
-              {item.offer > 0 && (
-                <p className="text-sm font-semibold line-through text-red-500">
-                  {formatCurrency(originalPrice)}
-                </p>
-              )}
+            <div className='flex gap-1 items-end'>
               <p className="text-sm font-semibold">
                 {formatCurrency(discountedPrice)}
                 <span className='uppercase text-xs font-bold text-muted-foreground'>
-                  {' '}- {availableVariant.name}
+                 -{availableVariant.name}
                 </span>
               </p>
+              {item.offer > 0 && (
+                <p className="text-xs font-semibold line-through text-red-500">
+                  {formatCurrency(originalPrice)}
+                </p>
+              )}
             </div>
           );
         } else {
@@ -85,10 +88,8 @@ const ProductCard = ({ item }: any) => {
 
     </div>
   </div>
-</Link>
 
+  );
+};
 
-  )
-}
-
-export default ProductCard
+export default ProductCard;
