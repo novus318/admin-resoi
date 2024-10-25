@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button';
-import { Book, LayoutDashboard, LogOut, LucideListOrdered, MenuIcon, Outdent, PlusSquareIcon, QrCode, Receipt, Settings, StoreIcon, X } from 'lucide-react';
+import { Book, LayoutDashboard, LogOut, LucideListOrdered, MenuIcon, Outdent, PlusSquareIcon, QrCode, Receipt, Settings, StoreIcon, User2, Users2, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { ReactNode, useState } from 'react';
@@ -146,6 +146,30 @@ const isWaiter =decryptedRole === 'waiter'
               >
                 <StoreIcon className="mr-3" />
                 <span className="text-lg">Online orders</span>
+              </div>
+            </Link>
+          </li>
+          <li className="mb-4 transition duration-300 ease-in-out transform hover:scale-105">
+            <Link href="/users">
+              <div
+                className={`flex items-center py-1 px-2 rounded-md  hover:bg-primary hover:text-primary-foreground  ${
+                  CurrentPage('/users') ? 'bg-secondary text-secondary-foreground': 'bg-primary text-primary-foreground'
+                }`}
+              >
+                <User2 className="mr-3" />
+                <span className="text-lg">Users</span>
+              </div>
+            </Link>
+          </li>
+          <li className="mb-4 transition duration-300 ease-in-out transform hover:scale-105">
+            <Link href="/staffs">
+              <div
+                className={`flex items-center py-1 px-2 rounded-md  hover:bg-primary hover:text-primary-foreground  ${
+                  CurrentPage('/staffs') ? 'bg-secondary text-secondary-foreground': 'bg-primary text-primary-foreground'
+                }`}
+              >
+                <Users2 className="mr-3" />
+                <span className="text-lg">Staff</span>
               </div>
             </Link>
           </li>

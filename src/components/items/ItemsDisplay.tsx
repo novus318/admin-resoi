@@ -1,17 +1,17 @@
 'use client'
-import axios from 'axios'
-import { Search } from 'lucide-react'
-import Image from "next/legacy/image"
-import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-import ProductCard from './ProductCard'
+import axios from 'axios';
+import { Search } from 'lucide-react';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import ProductCard from './ProductCard';
 
 const ItemsDisplay = () => {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [items,setItems]=useState([])
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-  const [loadingItems, setLoadingItems] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [items,setItems]=useState([]);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const [loadingItems, setLoadingItems] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
   const fetchitems =async()=>{
     try{
       setLoadingItems(true)
@@ -25,6 +25,7 @@ const ItemsDisplay = () => {
       setLoadingItems(false)
     }
   }
+
   const filteredItems = items
     .filter((item:any) => {
       const query = searchQuery.toLowerCase();
@@ -41,9 +42,10 @@ const ItemsDisplay = () => {
 
   useEffect(() => {
     fetchitems()
-  }, [])
+  },[])
+
   return (
-   <>
+   <div className='p-2'>
     <div className="rounded-2xl overflow-hidden shadow-lg w-full bg-white  px-2 py-4">
     <div className="">
   <div className="flex flex-wrap justify-between items-center text-gray-600 text-sm gap-2">
@@ -83,7 +85,8 @@ const ItemsDisplay = () => {
       </div>
       )}
     </div>
-  </div></>
+  </div>
+  </div>
   )
 }
 

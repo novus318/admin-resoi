@@ -16,7 +16,7 @@ const Unauthorised = () => {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Access Denied</AlertTitle>
           <AlertDescription>
-            You don&apose;t have the necessary permissions to view this page.
+            You do not have the necessary permissions to view this page.
           </AlertDescription>
         </Alert>
         <p className="mt-4 text-muted-foreground text-center">

@@ -46,6 +46,7 @@ const TableManage = () => {
    useEffect(()=>{
      fetchTables();
    },[]);
+   
   const handleCreateTable = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -76,7 +77,7 @@ const TableManage = () => {
   };
 
   return (
-    <div>
+    <div className='p-2'>
       <form onSubmit={handleCreateTable} className="mb-4">
         <div className="flex gap-2">
           <Input
