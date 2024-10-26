@@ -1,15 +1,15 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import axios from 'axios';
-import { Skeleton } from '../ui/skeleton';
+import Select from 'react-select';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 
-const Tablecard = ({ table, fetchTables }: any) => {
+const Tablecard = ({ table, fetchTables,categories }: any) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_APP_URL;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -17,7 +17,18 @@ const Tablecard = ({ table, fetchTables }: any) => {
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTableName, setEditedTableName] = useState(table?.tableName || '');
+  const [selectedCategories, setSelectedCategories] = useState<any>([]);
 
+  useEffect(() => {
+    // Pre-fill selected categories when editing starts
+    if (isEditing) {
+      const preSelected = table?.categories.map((category:any) => ({
+        value: category.value,
+        label: category.label,
+      }));
+      setSelectedCategories(preSelected || []);
+    }
+  }, [isEditing, table]);
 
   const downloadCard = (): void => {
     if (!cardRef.current) return; // Ensure cardRef is not null before proceeding
@@ -52,10 +63,28 @@ const Tablecard = ({ table, fetchTables }: any) => {
   };
 
   const handleUpdateTable = async () => {
+    if (!editedTableName) {
+      toast({
+        title: 'Error',
+        description: 'Table name is required',
+        variant: 'default',
+      });
+      return;
+      }
+
+      if (!selectedCategories.length) {
+        toast({
+          title: 'Error',
+          description: 'Please select at least one category',
+          variant: 'default',
+        });
+      return;
+      }
     setLoading(true);
     try {
       await axios.put(`${apiUrl}/api/table/update-table/${table._id}`, {
         tableName: editedTableName,
+        categories: selectedCategories,
       });
       await fetchTables();
       toast({
@@ -100,8 +129,8 @@ if(loading){
 }
   return (
     <div>
-      <Card key={table?._id} className="w-full">
-          <CardTitle className="text-2xl font-bold text-center">
+        <Card key={table?._id} className="w-full">
+        <CardTitle className="text-2xl font-bold text-center">
           {isEditing ? (
             <Input
               value={editedTableName}
@@ -111,8 +140,8 @@ if(loading){
           ) : (
             table?.tableName
           )}
-          </CardTitle>
-          <CardContent className="flex flex-col items-center p-2">
+        </CardTitle>
+        <CardContent className="flex flex-col items-center p-2">
           <div className="flex justify-between w-full px-5 mb-2">
             {isEditing ? (
               <>
@@ -139,6 +168,24 @@ if(loading){
               </>
             )}
           </div>
+          {isEditing ? (
+            <Select
+              isMulti
+              options={categories}
+              value={selectedCategories}
+              onChange={(selected) => setSelectedCategories(selected)}
+              placeholder="Select Categories"
+              className="w-full mb-2"
+            />
+          ) : (
+            <div className="mb-2">
+              {table?.categories.map((category:any) => (
+                <span key={category.value} className="badge">
+                  {category.label},
+                </span>
+              ))}
+            </div>
+          )}
           <div className="mb-4">
             <QRCodeCanvas value={qrValue} size={200} />
           </div>
