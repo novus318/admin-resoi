@@ -104,7 +104,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Today's Orders</CardTitle>
+          <CardTitle className="text-2xl font-bold">Today&apos;s Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
