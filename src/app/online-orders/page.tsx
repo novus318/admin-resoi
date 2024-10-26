@@ -55,8 +55,10 @@ const Online = () => {
       };
 
       ws.onmessage = (event) => {
-        const newOrder = JSON.parse(event.data);
-        setOrders((prevOrders:any) => [...prevOrders, newOrder]);
+        const { type, order } = JSON.parse(event.data);
+        if (type === 'onlineOrder') {
+          setOrders((prevOrders:any) => [...prevOrders, order]);
+        }
       };
 
       ws.onerror = (error) => {
