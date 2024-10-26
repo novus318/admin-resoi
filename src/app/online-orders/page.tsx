@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import CryptoJS from 'crypto-js';
 import AdminLayout from '@/components/AdminLayout';
 import Unauthorised from '@/components/Middleware/Unauthorised';
@@ -17,7 +17,7 @@ const Online = () => {
   const [orders, setOrders] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Fetch initial orders
   const fetchOrders = async () => {
@@ -46,9 +46,9 @@ const Online = () => {
   useEffect(() => {
     fetchOrders();
 
-    const connectWebSocket = () => {
-      const ws = new WebSocket(wsUrl); // Use the WebSocket URL from environment variables
-      setSocket(ws);
+    if (!wsRef.current) {
+      // Only establish the WebSocket connection if it doesn't already exist
+      const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
         console.log('WebSocket connection established');
@@ -66,19 +66,28 @@ const Online = () => {
       ws.onclose = () => {
         console.log('WebSocket closed, attempting to reconnect...');
         setTimeout(() => {
-          connectWebSocket(); // Attempt to reconnect after a delay
+          wsRef.current = null; // Reset ref before attempting to reconnect
+          connectWebSocket();
         }, 5000); // Adjust delay as necessary
       };
-    };
 
-    connectWebSocket();
+      wsRef.current = ws; // Store the WebSocket instance in the ref
+    }
 
     return () => {
-      if (socket) {
-        socket.close(); // Cleanup on unmount
+      if (wsRef.current) {
+        wsRef.current.close(); // Cleanup on unmount
+        wsRef.current = null;
       }
     };
-  }, [wsUrl]);
+  }, []);
+
+  const connectWebSocket = () => {
+    if (!wsRef.current) {
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+    }
+  };
 
   if (loading) {
     return <Spinner />;

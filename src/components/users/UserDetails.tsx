@@ -9,6 +9,36 @@ import { toast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import DeleteUser from './DeleteUser'
+import { MapPin, Phone, User } from 'lucide-react'
+import { Badge } from '../ui/badge'
+
+interface User {
+  name: string;
+  mobileNumber: string;
+  address: string;
+}
+
+interface CartItem {
+  name: string;
+  image: string;
+  variant?: string;
+  price: number;
+  offer: number;
+  quantity: number;
+}
+
+interface Order {
+  _id: string;
+  orderId: string;
+  user: User;
+  totalAmount: number;
+  status: string;
+  createdAt: Date;
+  cartItems: CartItem[];
+  address: string;
+  paymentMethod:string;
+  paymentStatus: string;
+}
 
 const UserDetails = ({id}:any) => {
     const [user, setUser] = React.useState<any>({})
@@ -17,8 +47,22 @@ const UserDetails = ({id}:any) => {
     const [onlineOrders,setOnlineOrders]=useState([])
     const [storeOrders,setStoreOrders]=useState<any>([])
     const [loadingData, setLoadingData] = useState<boolean>(false);
+    const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  
 
-
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case 'completed':
+          return 'bg-green-100 text-green-800';
+        case 'cancelled':
+          return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-yellow-100 text-yellow-800';
+      }
+    };
+    const toggleOrderDetails = (orderId: string) => {
+      setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
+    };
     const fetchUser = async () => {
         try {
           setLoadingData(true);
@@ -115,18 +159,132 @@ const UserDetails = ({id}:any) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Amount</TableHead>
+            <TableHead className="w-[100px]">Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {onlineOrders.map((order:any) => (
-              <TableRow key={order._id}>
-                <TableCell>{order?.orderId}</TableCell>
-                <TableCell>{format(new Date(order?.createdAt), 'dd MMM yyyy')}</TableCell>
-                <TableCell>{formatCurrency(order?.totalAmount)}</TableCell>
-              </TableRow>
+            {onlineOrders?.sort((a: Order, b: Order) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB.getTime() - dateA.getTime(); // Use getTime() to get a numeric value
+  })
+                  .map((order:Order) => (
+                    <React.Fragment key={order._id}>
+                    <TableRow className="cursor-pointer" onClick={() => toggleOrderDetails(order._id)}>
+                      <TableCell className="font-medium">{order.orderId}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <User className="h-3 w-3" />
+                          <span>{user?.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="text-sm">
+                          <p>{format(new Date(order.createdAt), 'dd MMM yyyy')}</p>
+                          <p className="text-muted-foreground">{format(new Date(order.createdAt), 'hh:mm a')}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(order.status)}>
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                    {expandedOrderId === order._id && (
+                      <TableRow>
+                        <TableCell colSpan={6}>
+                          <Card className="mt-2">
+                            <CardContent className="p-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                  <h3 className="font-semibold mb-2">Customer Details</h3>
+                                  <div className="space-y-1">
+                                    <p className="text-xs flex items-center">
+                                      <User className="h-3 w-3 mr-2" />
+                                      {user?.name}
+                                    </p>
+                                    <p className="text-xs flex items-center">
+                                      <Phone className="h-3 w-3 mr-2" />
+                                      +91 {user?.mobileNumber}
+                                    </p>
+                                    <p className="text-xs flex items-center">
+                                      <MapPin className="h-3 w-3 mr-2" />
+                                      {order?.address}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold mb-2">Order Summary</h3>
+                                  <div className="space-y-1 text-xs">
+                                    <p>Payment: {order?.paymentMethod} - {order?.paymentStatus}</p>
+                                    <p>Total Amount: {formatCurrency(order.totalAmount)}</p>
+                                    <p>Status: {order.status}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <h3 className="font-semibold mb-2">Order Items</h3>
+                              <div className="space-y-2">
+                                {order.cartItems.map((item, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex items-center justify-between border pe-4 p-1 rounded-lg bg-background"
+                                  >
+                                    <div className="flex items-center space-x-3">
+                                      <img
+                                        src={`${apiUrl}${item.image}`}
+                                        alt={item.name}
+                                        className="w-12 h-12 object-cover rounded"
+                                      />
+                                      <div>
+                                        <p className="font-semibold text-sm">{item.name}</p>
+                                        {item.variant && (
+                                          <p className="text-xs text-muted-foreground font-medium">
+                                            {item.variant}
+                                          </p>
+                                        )}
+                                        <div className="text-xs">
+                                          {item.offer ? (
+                                            <>
+                                              <span className="line-through text-muted-foreground">
+                                                {formatCurrency(item.price)}
+                                              </span>{' '}
+                                              <span className="font-bold">
+                                                {formatCurrency(
+                                                  item.price - item.price * (item.offer / 100)
+                                                )}
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span className="font-bold">
+                                              {formatCurrency(item.price)}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-sm font-medium">Qty: {item.quantity}</p>
+                                      <p className="text-sm font-bold">
+                                        {formatCurrency(
+                                          item.price * item.quantity -
+                                          item.price * item.quantity * (item.offer / 100)
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
             ))}
           </TableBody>
         </Table>
@@ -135,18 +293,132 @@ const UserDetails = ({id}:any) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Amount</TableHead>
+            <TableHead className="w-[100px]">Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {storeOrders.map((order:any) => (
-              <TableRow key={order.id}>
-                  <TableCell>{order?.orderId}</TableCell>
-                <TableCell>{format(new Date(order?.createdAt), 'dd MMM yyyy')}</TableCell>
-                <TableCell>{formatCurrency(order?.totalAmount)}</TableCell>
-              </TableRow>
+            {storeOrders.sort((a: Order, b: Order) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB.getTime() - dateA.getTime(); // Use getTime() to get a numeric value
+  })
+                  .map((order:Order) => (
+                    <React.Fragment key={order._id}>
+                    <TableRow className="cursor-pointer" onClick={() => toggleOrderDetails(order._id)}>
+                      <TableCell className="font-medium">{order.orderId}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <User className="h-3 w-3" />
+                          <span>{user?.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="text-sm">
+                          <p>{format(new Date(order.createdAt), 'dd MMM yyyy')}</p>
+                          <p className="text-muted-foreground">{format(new Date(order.createdAt), 'hh:mm a')}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(order.status)}>
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                    {expandedOrderId === order._id && (
+                      <TableRow>
+                        <TableCell colSpan={6}>
+                          <Card className="mt-2">
+                            <CardContent className="p-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                  <h3 className="font-semibold mb-2">Customer Details</h3>
+                                  <div className="space-y-1">
+                                    <p className="text-xs flex items-center">
+                                      <User className="h-3 w-3 mr-2" />
+                                      {user?.name}
+                                    </p>
+                                    <p className="text-xs flex items-center">
+                                      <Phone className="h-3 w-3 mr-2" />
+                                      +91 {user?.mobileNumber}
+                                    </p>
+                                    <p className="text-xs flex items-center">
+                                      <MapPin className="h-3 w-3 mr-2" />
+                                      {order?.address}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold mb-2">Order Summary</h3>
+                                  <div className="space-y-1 text-xs">
+                                    <p>Payment: {order?.paymentMethod} - {order?.paymentStatus}</p>
+                                    <p>Total Amount: {formatCurrency(order.totalAmount)}</p>
+                                    <p>Status: {order.status}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <h3 className="font-semibold mb-2">Order Items</h3>
+                              <div className="space-y-2">
+                                {order.cartItems.map((item, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex items-center justify-between border pe-4 p-1 rounded-lg bg-background"
+                                  >
+                                    <div className="flex items-center space-x-3">
+                                      <img
+                                        src={`${apiUrl}${item.image}`}
+                                        alt={item.name}
+                                        className="w-12 h-12 object-cover rounded"
+                                      />
+                                      <div>
+                                        <p className="font-semibold text-sm">{item.name}</p>
+                                        {item.variant && (
+                                          <p className="text-xs text-muted-foreground font-medium">
+                                            {item.variant}
+                                          </p>
+                                        )}
+                                        <div className="text-xs">
+                                          {item.offer ? (
+                                            <>
+                                              <span className="line-through text-muted-foreground">
+                                                {formatCurrency(item.price)}
+                                              </span>{' '}
+                                              <span className="font-bold">
+                                                {formatCurrency(
+                                                  item.price - item.price * (item.offer / 100)
+                                                )}
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span className="font-bold">
+                                              {formatCurrency(item.price)}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-sm font-medium">Qty: {item.quantity}</p>
+                                      <p className="text-sm font-bold">
+                                        {formatCurrency(
+                                          item.price * item.quantity -
+                                          item.price * item.quantity * (item.offer / 100)
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
             ))}
           </TableBody>
         </Table>

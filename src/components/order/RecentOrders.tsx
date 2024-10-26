@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Search, ChevronDown, ChevronUp, MapPin, Phone, User } from 'lucide-react';
 import { formatCurrency } from "@/lib/currencyFormat";
 import { format } from "date-fns";
+import OnlineOrdersToggle from "./OnlineOrdersToggle";
 
 interface User {
   name: string;
@@ -50,6 +51,8 @@ interface Order {
   createdAt: Date;
   cartItems: CartItem[];
   address: string;
+  paymentMethod:string;
+  paymentStatus: string;
 }
 
 interface RecentOrdersProps {
@@ -69,7 +72,6 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
 }) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
-  const [isOnlineOrders, setIsOnlineOrders] = useState(false);
 
   const filteredOrders = orders?.filter((order) => {
     const matchesSearchTerm =
@@ -80,9 +82,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
     const matchesStatus =
       statusFilter === "all" || order.status === statusFilter;
 
-    const matchesOnlineFilter = isOnlineOrders ? order.status !== "cancelled" : true;
-
-    return matchesSearchTerm && matchesStatus && matchesOnlineFilter;
+    return matchesSearchTerm && matchesStatus;
   });
 
   const toggleOrderDetails = (orderId: string) => {
@@ -108,14 +108,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="online-toggle"
-                checked={isOnlineOrders}
-                onCheckedChange={setIsOnlineOrders}
-              />
-              <Label htmlFor="online-toggle">Online orders only</Label>
-            </div>
+           <OnlineOrdersToggle/>
             <div className="flex flex-col space-y-2 md:flex-row md:space-x-4 md:space-y-0">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -161,7 +154,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
   })
                   .map((order) => (
                     <React.Fragment key={order._id}>
-                      <TableRow onClick={() => toggleOrderDetails(order._id)}>
+                      <TableRow className="cursor-pointer" onClick={() => toggleOrderDetails(order._id)}>
                         <TableCell className="font-medium">{order.orderId}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
@@ -208,7 +201,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
                                   <div>
                                     <h3 className="font-semibold mb-2">Order Summary</h3>
                                     <div className="space-y-1 text-xs">
-                                      <p>Total Items: {order.cartItems.length}</p>
+                                      <p>Payment: {order?.paymentMethod} - {order?.paymentStatus}</p>
                                       <p>Total Amount: {formatCurrency(order.totalAmount)}</p>
                                       <p>Status: {order.status}</p>
                                     </div>
