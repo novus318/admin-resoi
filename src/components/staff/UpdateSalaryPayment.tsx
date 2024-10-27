@@ -32,7 +32,7 @@ const UpdateSalaryPayment = ({  salary }: any) => {
   const [btLoading, setBtLoading] = useState(false);
   const [bank, setBank] = useState<BankAccount[]>([]);
   const [targetAccount, setTargetAccount] = useState<any>(null);
-  const [payDate, setPayDate] = useState(null);
+  const [payDate, setPayDate] = useState<any>(null);
   const [leaveDays, setLeaveDays] = useState(null);
   const [advanceRepayment, setAdvanceRepayment] = useState(null); // State for advance repayment
   const [otpSent, setOtpSent] = useState(false);
@@ -229,11 +229,11 @@ const UpdateSalaryPayment = ({  salary }: any) => {
             Salary: ₹{(selectedSalary?.basicPay || 0).toFixed(2)}<br />
             Advance payment: ₹{(selectedSalary?.staffId.advancePayment || 0).toFixed(2)}
           </DialogDescription>
-          {!otpSent && (<div>
-
+          {!otpSent && (
+            <div>
             <div>
               <p className='text-sm font-medium'>Date of Pay</p>
-              <DateTimePicker value={payDate} onChange={setPayDate} />
+              <DateTimePicker value={payDate||undefined} onChange={setPayDate} />
             </div>
 
             <div>
