@@ -1,11 +1,9 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react';
+import React, {  useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, Circle, CircleAlert, Dot, PlusCircle, Trash } from 'lucide-react';
-import DatePicker from '@/components/ui/DatePicker';
+import { CheckCircle, CircleAlert } from 'lucide-react';
 import axios from 'axios';
 import { sendOtp } from '@/utils/sendOtp';
 import { toast } from '@/hooks/use-toast';
