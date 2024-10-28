@@ -89,16 +89,14 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
     setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
+  const statusColorMap:any = {
+    all: 'bg-gray-200 text-gray-800', 
+    pending: 'bg-yellow-100 text-yellow-800', 
+    confirmed: 'bg-blue-100 text-blue-800', 
+    'in-progress': 'bg-orange-100 text-orange-800', 
+    completed: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800', 
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -170,7 +168,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
                         </TableCell>
                         <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={getStatusColor(order.status)}>
+                          <Badge variant="outline" className={`${statusColorMap[order.status]}`}>
                             {order.status}
                           </Badge>
                         </TableCell>
