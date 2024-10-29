@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import CryptoJS from 'crypto-js'
+import Authorised from '@/components/Middleware/Authorised';
 
 const Login = () => {
   const encryptionKey:any = process.env.NEXT_PUBLIC_KEY;
@@ -18,7 +19,23 @@ const Login = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect'); 
+  const [ok, setOk] = useState<boolean | null>(null);
 
+  const checkAuth = async () => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      try {
+        const response = await axios.post(`${apiUrl}/api/auth/verify`, { token });
+        setOk(response.data.success);
+      } catch {
+        setOk(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
   const handleSubmit = async (e:any) => {
     e.preventDefault()
     if(!username){
@@ -65,6 +82,7 @@ const encryptedRole = CryptoJS.AES.encrypt(userRole, encryptionKey).toString();
     }
   };
 
+  if (ok) return <Authorised />;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary-foreground">

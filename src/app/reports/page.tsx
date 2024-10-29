@@ -5,6 +5,7 @@ import { withAuth } from '@/components/Middleware/withAuth';
 import React, { useEffect, useState } from 'react'
 import CryptoJS from 'crypto-js';
 import Spinner from '@/components/Spinner';
+import ReportOverview from '@/components/report/ReportOverview';
 
 const Reports = () => {
   const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ const Reports = () => {
 
   return isAdmin ? (
     <AdminLayout>
-     <div></div>
+    <ReportOverview/>
     </AdminLayout>
   ) : (
     <Unauthorised />
