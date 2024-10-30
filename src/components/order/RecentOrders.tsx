@@ -17,15 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Search, ChevronDown, ChevronUp, MapPin, Phone, User } from 'lucide-react';
+import { Search,  MapPin, Phone, User } from 'lucide-react';
 import { formatCurrency } from "@/lib/currencyFormat";
 import { format } from "date-fns";
 import OnlineOrdersToggle from "./OnlineOrdersToggle";
+import ChangeOnlineStatus from "./ChangeOnlineStatus";
 
 interface User {
   name: string;
@@ -61,6 +59,8 @@ interface RecentOrdersProps {
   setSearchTerm: (term: string) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
+  refreshOrders: () => void;
+  refreshAssets?: () => void;
 }
 
 const RecentOrders: React.FC<RecentOrdersProps> = ({
@@ -69,6 +69,8 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
   setSearchTerm,
   statusFilter,
   setStatusFilter,
+  refreshOrders ,
+  refreshAssets
 }) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -89,14 +91,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
     setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
   };
 
-  const statusColorMap:any = {
-    all: 'bg-gray-200 text-gray-800', 
-    pending: 'bg-yellow-100 text-yellow-800', 
-    confirmed: 'bg-blue-100 text-blue-800', 
-    'in-progress': 'bg-orange-100 text-orange-800', 
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800', 
-  }
+
 
   return (
     <div>
@@ -138,7 +133,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
                 <TableRow>
                   <TableHead className="w-[100px]">Order ID</TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead >Date</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -152,25 +147,27 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
   })
                   .map((order) => (
                     <React.Fragment key={order._id}>
-                      <TableRow className="cursor-pointer" onClick={() => toggleOrderDetails(order._id)}>
-                        <TableCell className="font-medium">{order.orderId}</TableCell>
-                        <TableCell>
+                      <TableRow className="cursor-pointer">
+                        <TableCell onClick={() => toggleOrderDetails(order._id)} className="font-medium">{order.orderId}</TableCell>
+                        <TableCell onClick={() => toggleOrderDetails(order._id)}>
                           <div className="flex items-center space-x-2">
                             <User className="h-3 w-3" />
                             <span>{order.user?.name}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell">
+                        <TableCell onClick={() => toggleOrderDetails(order._id)}>
                           <div className="text-sm">
                             <p>{format(new Date(order.createdAt), 'dd MMM yyyy')}</p>
                             <p className="text-muted-foreground">{format(new Date(order.createdAt), 'hh:mm a')}</p>
                           </div>
                         </TableCell>
-                        <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                        <TableCell onClick={() => toggleOrderDetails(order._id)}>{formatCurrency(order.totalAmount)}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={`${statusColorMap[order.status]}`}>
-                            {order.status}
-                          </Badge>
+                       <ChangeOnlineStatus
+                        order={order}
+                        refreshOrders={refreshOrders} 
+                        refreshAssets={refreshAssets}
+                         />
                         </TableCell>
                       </TableRow>
                       {expandedOrderId === order._id && (

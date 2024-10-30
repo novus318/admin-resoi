@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [onlineOrders, setOnlineOrders] = useState<any>([]);
   const [asset, setAsset] = useState<any>({});
 
+
   const fetchAssets = async () => {
     try {
       const response = await axios.get(`${apiUrl}/api/dashboard/totalof-day`);
@@ -63,6 +64,7 @@ const Dashboard = () => {
       console.error('Failed to fetch orders:', error);
     }
   };
+
   useEffect(() => {
     fetchOrders();
     fetchonlineOrders();
@@ -163,13 +165,16 @@ const Dashboard = () => {
       </CardContent>
     </Card>
   </div>
-    <div className="w-full grid gap-4 mt-4">
+  <div>
+  <div className=" space-y-4 mt-4">
           <RecentStoreOrders
         orders={orders} 
         searchTerm={searchTerm} 
         setSearchTerm={setSearchTerm} 
         statusFilter={statusFilter} 
         setStatusFilter={setStatusFilter} 
+        refreshOrders={fetchOrders} 
+        refreshAssets={fetchAssets}
       />
          <RecentOrders 
         orders={onlineOrders} 
@@ -177,8 +182,11 @@ const Dashboard = () => {
         setSearchTerm={setSearchTermOnline} 
         statusFilter={statusFilterOnline} 
         setStatusFilter={setStatusFilterOnline} 
+        refreshOrders={fetchonlineOrders} 
+        refreshAssets={fetchAssets}
       />
     </div>
+  </div>
   </div>
   )
 }

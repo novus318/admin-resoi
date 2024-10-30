@@ -17,15 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Search, ChevronDown, ChevronUp, MapPin, Phone, User } from 'lucide-react';
+import { Search, MapPin, Phone, User } from 'lucide-react';
 import { formatCurrency } from "@/lib/currencyFormat";
 import { format } from "date-fns";
-import OnlineOrdersToggle from "./OnlineOrdersToggle";
+import ChangeTableStatus from "./ChangeTableStatus";
 
 interface User {
   name: string;
@@ -65,6 +61,8 @@ interface RecentOrdersProps {
   setSearchTerm: (term: string) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
+  refreshOrders: () => void;
+  refreshAssets?: () => void;
 }
 
 
@@ -74,6 +72,8 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
     setSearchTerm,
     statusFilter,
     setStatusFilter,
+    refreshOrders ,
+    refreshAssets
   }) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -94,16 +94,7 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
       setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
     };
   
-    const getStatusColor = (status: string) => {
-      switch (status) {
-        case 'completed':
-          return 'bg-green-100 text-green-800';
-        case 'cancelled':
-          return 'bg-red-100 text-red-800';
-        default:
-          return 'bg-yellow-100 text-yellow-800';
-      }
-    };
+ 
   
     return (
       <div>
@@ -138,13 +129,13 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
                 </Select>
               </div>
             </div>
-            <div className="overflow-x-auto">
+            <div>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[100px]">Order ID</TableHead>
                     <TableHead>Customer</TableHead>
-                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                    <TableHead >Date</TableHead>
                     <TableHead>Table</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Status</TableHead>
@@ -159,30 +150,30 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
     })
                     .map((order) => (
                       <React.Fragment key={order._id}>
-                        <TableRow className="cursor-pointer" onClick={() => toggleOrderDetails(order._id)}>
-                          <TableCell className="font-medium">{order.orderId}</TableCell>
-                          <TableCell>
+                        <TableRow className="cursor-pointer">
+                          <TableCell onClick={() => toggleOrderDetails(order._id)} className="font-medium">{order.orderId}</TableCell>
+                          <TableCell onClick={() => toggleOrderDetails(order._id)}>
                             <div className="flex items-center space-x-2">
                               <User className="h-3 w-3" />
                               <span>{order.user?.name}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden md:table-cell">
+                          <TableCell onClick={() => toggleOrderDetails(order._id)}>
                             <div className="text-sm">
                               <p>{format(new Date(order.createdAt), 'dd MMM yyyy')}</p>
                               <p className="text-muted-foreground">{format(new Date(order.createdAt), 'hh:mm a')}</p>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="text-xs">
+                          <TableCell onClick={() => toggleOrderDetails(order._id)}>
+                            <div className="text-sm">
                               <p>{order?.table?.tableName||'NIL'}</p>
                             </div>
                           </TableCell>
-                          <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                          <TableCell onClick={() => toggleOrderDetails(order._id)}>{formatCurrency(order.totalAmount)}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={getStatusColor(order.status)}>
-                              {order.status}
-                            </Badge>
+                            <ChangeTableStatus order={order}
+                             refreshOrders={refreshOrders} 
+                             refreshAssets={refreshAssets}/>
                           </TableCell>
                         </TableRow>
                         {expandedOrderId === order._id && (
