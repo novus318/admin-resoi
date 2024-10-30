@@ -103,6 +103,7 @@ const Orders = () => {
         setSearchTerm={setSearchTerm} 
         statusFilter={statusFilter} 
         setStatusFilter={setStatusFilter} 
+        refreshOrders={fetchOrders} 
       />
    </div>
     </AdminLayout>
