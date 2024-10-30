@@ -97,6 +97,7 @@ const Online = () => {
 
   return isAdmin ? (
     <AdminLayout>
+         <div className='p-2 md:p-6'>
       <RecentOrders 
         orders={orders} 
         searchTerm={searchTerm} 
@@ -104,6 +105,7 @@ const Online = () => {
         statusFilter={statusFilter} 
         setStatusFilter={setStatusFilter} 
       />
+      </div>
     </AdminLayout>
   ) : (
     <Unauthorised />

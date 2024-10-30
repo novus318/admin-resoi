@@ -9,7 +9,7 @@ const Notfound = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push('/');
-    }, 10000);
+    }, 1000);
 
     // Cleanup the timer on component unmount
     return () => clearTimeout(timer);

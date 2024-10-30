@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     Card,
     CardContent,
@@ -8,66 +8,178 @@ import {
     CardHeader,
     CardTitle,
   } from "@/components/ui/card"
+import RecentStoreOrders from './order/RecentStoreOrders'
+import axios from 'axios'
+import RecentOrders from './order/RecentOrders'
+import { Banknote, Logs, ReceiptIndianRupeeIcon, Ticket } from 'lucide-react'
+import { formatCurrency } from '@/lib/currencyFormat'
 
 const Dashboard = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const wsUrl:any = process.env.NEXT_PUBLIC_WS_URL;
+  const [orders, setOrders] = useState<any>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTermOnline, setSearchTermOnline] = useState('');
+  const [statusFilterOnline, setStatusFilterOnline] = useState('all');
+  const wsRef = useRef<WebSocket | null>(null);
+  const [onlineOrders, setOnlineOrders] = useState<any>([]);
+  const [asset, setAsset] = useState<any>({});
+
+  const fetchAssets = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/api/dashboard/totalof-day`);
+      if (response.data.success) {
+        setAsset({
+          tableOrderTotal:response.data.tableOrderTotal,
+            onlineOrderTotal:response.data.onlineOrderTotal,
+            totalExpenses:response.data.totalExpenses,
+            totalRevenue:response.data.totalRevenue
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    }
+  };
+
+  const fetchonlineOrders = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/api/online/get-online/ordersToday`);
+      if (response.data.success) {
+        setOnlineOrders(response.data.orders);
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    }
+  };
+  // Fetch initial orders
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/api/tableOrder/get-store/ordersToday`);
+      if (response.data.success) {
+        setOrders(response.data.orders);
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    }
+  };
+  useEffect(() => {
+    fetchOrders();
+    fetchonlineOrders();
+    fetchAssets();
+
+    if (!wsRef.current) {
+      // Only establish the WebSocket connection if it doesn't already exist
+      const ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      ws.onmessage = (event) => {
+        const { type, order } = JSON.parse(event.data);
+        if (type === 'tableOrder') {
+          setOrders((prevOrders:any) => [...prevOrders, order]);
+          fetchAssets();
+        }
+        if (type === 'onlineOrder') {
+          setOnlineOrders((prevOrders:any) => [...prevOrders, order]);
+          fetchAssets();
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed, attempting to reconnect...');
+        setTimeout(() => {
+          wsRef.current = null; // Reset ref before attempting to reconnect
+          connectWebSocket();
+        }, 5000); // Adjust delay as necessary
+      };
+
+      wsRef.current = ws; // Store the WebSocket instance in the ref
+    }
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close(); // Cleanup on unmount
+        wsRef.current = null;
+      }
+    };
+  }, []);
+
+  const connectWebSocket = () => {
+    if (!wsRef.current) {
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+    }
+  };
   return (
-    <div className="w-full md:w-5/6 p-4 space-y-4">
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Accounts</CardTitle>
-              <CardDescription>The total number of assets managed by the accounts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">₹23</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Donations</CardTitle>
-              <CardDescription>The total amount of donations received this month</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">₹32</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Expenses</CardTitle>
-              <CardDescription>The total Expenses of the month.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">₹{34}</div>
-            </CardContent>
-            <CardFooter>
-              <div className="text-sm text-gray-600">
-                {4 > 0? '+': ''}{4}%  from last month
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Asset Distribution</CardTitle>
-              <CardDescription>A breakdown the assets of month by category.</CardDescription>
-            </CardHeader>
-            <CardContent>
-            
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Donation & Expense Trends</CardTitle>
-              <CardDescription>A line chart showing the trend of donations & expenses over time.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              
-            </CardContent>
-          </Card>
-          </div>
-         
+  <div className='px-4 pt-4'>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+          Today&apos;s Revenue
+        </CardTitle>
+        <Banknote/>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{formatCurrency(asset.totalRevenue||0)}</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+         In Store
+        </CardTitle>
+        <Logs/>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{formatCurrency(asset.tableOrderTotal||0)}</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Online</CardTitle>
+        <Ticket/>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{formatCurrency(asset.onlineOrderTotal||0)}</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">
+          Today&apos;s Expense
+        </CardTitle>
+        <ReceiptIndianRupeeIcon/>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{formatCurrency(asset.totalExpenses||0)}</div>
+      </CardContent>
+    </Card>
+  </div>
+    <div className="w-full grid gap-4 mt-4">
+          <RecentStoreOrders
+        orders={orders} 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm} 
+        statusFilter={statusFilter} 
+        setStatusFilter={setStatusFilter} 
+      />
+         <RecentOrders 
+        orders={onlineOrders} 
+        searchTerm={searchTermOnline} 
+        setSearchTerm={setSearchTermOnline} 
+        statusFilter={statusFilterOnline} 
+        setStatusFilter={setStatusFilterOnline} 
+      />
     </div>
+  </div>
   )
 }
 

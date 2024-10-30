@@ -96,13 +96,15 @@ const Orders = () => {
 
   return isAdmin ? (
     <AdminLayout>
-      <RecentStoreOrders
+   <div className='p-2 md:p-6'>
+   <RecentStoreOrders
         orders={orders} 
         searchTerm={searchTerm} 
         setSearchTerm={setSearchTerm} 
         statusFilter={statusFilter} 
         setStatusFilter={setStatusFilter} 
       />
+   </div>
     </AdminLayout>
   ) : (
     <Unauthorised />
