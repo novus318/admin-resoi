@@ -15,6 +15,7 @@ import RequestAdvancePay from '@/components/staff/RequestAdvancePay';
 import StaffResign from '@/components/staff/StaffResign';
 import PendingSalaries from '@/components/staff/PendingSalaries';
 import DownloadPayslip from '@/components/staff/DownloadPayslip';
+import AdvancePayments from '@/components/staff/AdvancePayments';
 
 interface Staff {
     _id: string,
@@ -199,8 +200,9 @@ const Page = withAuth(({ params }: any) => {
               </div>
             </div>
           </div>
-          <div>
-            <PendingSalaries id={pid} fetchStaffDetails={fetchStaffDetails} />
+          <div className='space-y-4'>
+          <PendingSalaries id={pid} fetchStaffDetails={fetchStaffDetails} /> 
+          <AdvancePayments staff={staff}/>
           </div>
           <div className="bg-white rounded-lg border p-6">
             <p className="text-2xl font-bold mb-4">Payslips</p>

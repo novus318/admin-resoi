@@ -44,23 +44,14 @@ const RequestAdvancePay = ({id,fetchStaffDetails}:any) => {
 
       const handleSubmit = async () => {
         setLoading(true);
-        const bankBalance:any = bank.find(acc => acc._id === targetAccount)
-        if (!targetAccount || amount <= 0) {
-          setLoading(false);
-          toast({
-            title: 'Error',
-            description: 'Please fill in all required fields',
-            variant: 'destructive',
-          });
-          return;
-        }
-        if (bankBalance?.balance < amount) {
+  
+        if (!amount || 0 > amount) {
             setLoading(false);
-          toast({
-            title: 'Error',
-            description: 'Insufficient balance in the selected account',
-            variant: 'destructive',
-          });
+            toast({
+              title: 'Error',
+              description: 'Please enter a valid amount greater than zero',
+              variant: 'destructive',
+            })
           return;
           }
         try {

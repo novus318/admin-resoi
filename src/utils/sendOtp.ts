@@ -14,7 +14,7 @@ export const sendOtp = async (
   otp: string
 ): Promise<boolean> => {
   const admins: Admin[] = [{
-    number: '911234567890',
+    number: '7560845014',
   }]
 
   const promises = admins.map(async (admin) => {
@@ -26,8 +26,8 @@ export const sendOtp = async (
           to: `91${admin.number}`,
           type: 'template',
           template: {
-            name: 'setting_login',
-            language: { code: 'en' },
+            name: 'user_auth',
+            language: { code: 'en_US' },
             components: [
               {
                 type: 'body',
