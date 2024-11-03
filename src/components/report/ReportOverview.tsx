@@ -1,14 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Area, AreaChart, CartesianGrid, Label, Line, Pie, PieChart, XAxis } from 'recharts'
-import { Banknote, ChevronLeft, ChevronRight, Loader2, Logs, ReceiptIndianRupee, Ticket } from 'lucide-react'
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Label, Legend, Line, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { Banknote, ChevronLeft, ChevronRight, Loader2, Logs, ReceiptIndianRupee, Ticket, TrendingDown, TrendingUp } from 'lucide-react'
 import { addDays, } from 'date-fns'
 
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -23,36 +24,54 @@ import { formatCurrency } from '@/lib/currencyFormat'
 import { Button } from '../ui/button'
 
 
-const monthNames = ["October", "September", "August", "July", "June", "May"];
 const ReportOverview = () => {
   const [data, setData] = useState<any>({})
   const [itemdata, setItemData] = useState<any>([])
+  const [saleTime, setSaleTime] = useState<any>([])
   const [RevenueExpense, setRevenueExpense] = useState<any>([])
   const [loading, setLoading] = useState(true)
   const [loadingRE, setLoadingRE] = useState(true)
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  const [months, setMonths] = useState([]);
   const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
-  const [uniqueMonths, setUniqueMonths] = useState([]);
+  const now = new Date();
+  const currentYear = now.getFullYear();
 
-  // Filter itemdata based on the current month
-  const currentMonth = uniqueMonths[currentMonthIndex];
 
-  // Filter item data by current month
-  const filteredData = itemdata.filter((item:any) => item.month === currentMonth);
 
-  // Handle month navigation
+  const fetchItemData = async () => {
+      try {
+          const response = await axios.get(`${apiUrl}/api/report/analytics/items-sold/last-six-months`);
+          const data = response.data;
+
+          setItemData(data.data);
+          setMonths(data.months); // Assuming the backend sends an array of months
+          setCurrentMonthIndex(data.months.length - 1); // Start with the last month in the received array
+      } catch (error) {
+          console.error('Failed to fetch data:', error);
+      }
+  };
+  const fetchSaleTime = async () => {
+    try {
+        const response = await axios.get(`${apiUrl}/api/report/analytics/average-sale-time/last-three-months`);
+        const data = response.data;
+
+        setSaleTime(data.data);
+    } catch (error) {
+        console.error('Failed to fetch data:', error);
+    }
+};
+
   const handlePreviousMonth = () => {
-    setCurrentMonthIndex((prevIndex) =>
-      prevIndex === 0 ? uniqueMonths.length - 1 : prevIndex - 1
-    );
+      setCurrentMonthIndex(prev => Math.max(prev - 1, 0)); // Prevent going below 0
   };
 
   const handleNextMonth = () => {
-    setCurrentMonthIndex((prevIndex) =>
-      prevIndex === uniqueMonths.length - 1 ? 0 : prevIndex + 1
-    );
+      setCurrentMonthIndex(prev => Math.min(prev + 1, months.length - 1)); // Prevent going beyond the last month
   };
 
+  const currentMonth = months[currentMonthIndex] ? months[currentMonthIndex] : '';
+  const currentData = itemdata.filter((data:any) => data.month === currentMonth);
 
   const fetchRevenueExpense = async () => {
     setLoadingRE(true)
@@ -83,8 +102,18 @@ const ReportOverview = () => {
   useEffect(() => {
     fetchData()
     fetchRevenueExpense()
+    fetchItemData()
+    fetchSaleTime()
   }, [])
 
+
+  const convertTime = (time: number) => {
+    const hours = Math.floor(time * 24)
+    const minutes = Math.floor((time * 24 * 60) % 60)
+    const ampm = hours >= 12 ? 'PM' : 'AM'
+    const formattedHours = hours % 12 || 12
+    return `${formattedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`
+  }
 
 
   return (
@@ -302,123 +331,100 @@ const ReportOverview = () => {
             </div>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
-      <CardHeader>
-        <CardTitle>Sale of Items</CardTitle>
-        <CardDescription>of {currentMonth}</CardDescription>
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-7">
+          <div className="col-span-2 md:col-span-4">
+          <Card>
+          <CardHeader>
+        <CardTitle>Weekly Sales Overview</CardTitle>
+        <CardDescription>Average sales, amounts, and peak time by day of the week</CardDescription>
       </CardHeader>
-      <div className="flex items-center justify-between mb-4 mx-3">
-        <Button variant="outline" size="icon" onClick={handlePreviousMonth}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <h2 className="text-xl font-semibold">{currentMonth}</h2>
-        <Button variant="outline" size="icon" onClick={handleNextMonth}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-      <CardContent className="flex-1 pb-0">
+      <CardContent>
         <ChartContainer
           config={{
-            saleOfItems: {
-              label: 'Sale of Items',
-              color: 'hsl(var(--chart-1))',
+            averageSale: {
+              label: "Average Sales",
+              color: "hsl(var(--chart-1))",
             },
-
+            averageAmount: {
+              label: "Average Amount",
+              color: "hsl(var(--chart-2))",
+            },
           }}
-          className="mx-auto aspect-square max-h-[250px]"
         >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={filteredData}
-              dataKey="totalSold"
-              nameKey="name"
-              innerRadius={60}
-              strokeWidth={5}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={saleTime} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis yAxisId="left" orientation="left" stroke="var(--color-averageSale)" />
+              <YAxis yAxisId="right" orientation="right" stroke="var(--color-averageAmount)" />
+              <ChartTooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
                     return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {currentMonth}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Items Sold
-                        </tspan>
-                      </text>
-                    );
+                      <div className="bg-background p-2 border rounded shadow">
+                        <p className="font-bold">{payload[0].payload.day}</p>
+                        <p>Peak Time: {convertTime(payload[0].payload.time)}</p>
+                        <p>Average Sales: {payload[0].payload.averageSale}</p>
+                        <p>Average Amount: {formatCurrency(payload[0].payload.averageAmount)}</p>
+                      </div>
+                    )
                   }
+                  return null
                 }}
               />
-            </Pie>
-          </PieChart>
+              <Legend />
+              <Bar yAxisId="left" dataKey="averageSale" fill="var(--color-averageSale)" name="Average Sales" />
+              <Bar yAxisId="right" dataKey="averageAmount" fill="var(--color-averageAmount)" name="Average Amount" />
+            </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
-    </Card>
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Staff Overview</CardTitle>
-                  <CardDescription>
-                    Total 56 staff members.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <div className="ml-2 space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          Chefs
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          12 members
-                        </p>
-                      </div>
-                      <div className="ml-auto font-medium">21%</div>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="ml-2 space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          Waiters
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          28 members
-                        </p>
-                      </div>
-                      <div className="ml-auto font-medium">50%</div>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="ml-2 space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          Kitchen Staff
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          16 members
-                        </p>
-                      </div>
-                      <div className="ml-auto font-medium">29%</div>
-                    </div>
-                  </div>
-                </CardContent>
               </Card>
+          </div>
+              <div className="col-span-2 md:col-span-3 min-h-[433px]">
+            <Card className="min-h-[433px]">
+                <CardHeader>
+                    <CardTitle>Item Overview - {currentMonth} {currentYear}</CardTitle>
+                    <CardDescription>
+                        Total {currentData.reduce((acc:any, item:any) => acc + item.totalSold, 0)} items sold in {currentMonth} {currentYear}
+                    </CardDescription>
+                </CardHeader>
+                <div className="flex items-center justify-between mb-4 mx-3">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handlePreviousMonth}
+                        disabled={currentMonthIndex === 0}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleNextMonth}
+                        disabled={currentMonthIndex === months.length - 1}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+                <CardContent>
+                    <div className="space-y-4">
+                        {currentData.length > 0 ? (
+                            currentData.map((item:any) => (
+                                <div key={item.item} className="flex items-center">
+                                    <div className="ml-2 space-y-1">
+                                        <p className="text-sm font-medium leading-none">{item.item}</p>
+                                        <p className="text-sm text-muted-foreground">{item.totalSold} items</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-muted-foreground">No items sold in this month.</p>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
             </div>
           </TabsContent>
         </Tabs>

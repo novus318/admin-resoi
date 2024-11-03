@@ -37,12 +37,14 @@ const ChangeTableStatus =({ order,
       if (response.data.success) {
         setStatus(newStatus)
         refreshOrders()
-        refreshAssets()
+        if(refreshAssets){
+          refreshAssets()
+        }
       }
     } catch (error:any) {
       toast({
        title: 'Failed to update status',
-       variant: 'default',
+       variant: 'destructive',
        description: error?.response?.data?.message || error.message || 'Something went wrong.',
       })
     } finally {
