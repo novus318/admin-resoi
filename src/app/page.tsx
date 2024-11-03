@@ -6,6 +6,7 @@ import Dashboard from "../components/Dashboard";
 import { withAuth } from "@/components/Middleware/withAuth";
 import CryptoJS from 'crypto-js';
 import Spinner from '@/components/Spinner';
+import OnlineOrders from '@/components/delevery/OnlineOrders';
 
 function Home() {
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ function Home() {
     <AdminLayout>
       {isAdmin && <Dashboard />}
       {isWaiter && <Orders />}
-      {isDelivery && <div>Delivery dashboard goes here</div>}
+      {isDelivery && <OnlineOrders/>}
     </AdminLayout>
   );
 }
