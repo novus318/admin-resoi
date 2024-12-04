@@ -48,6 +48,7 @@ interface Order {
   cartItems: CartItem[];
   address: string;
   paymentMethod:string;
+  orderType: string;
   paymentStatus: string;
   table:{
     tableName:number;
@@ -136,7 +137,7 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
                     <TableHead className="w-[100px]">Order ID</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead >Date</TableHead>
-                    <TableHead>Table</TableHead>
+                    <TableHead>Order type</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
@@ -166,7 +167,7 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
                           </TableCell>
                           <TableCell onClick={() => toggleOrderDetails(order._id)}>
                             <div className="text-sm">
-                              <p>{order?.table?.tableName||'NIL'}</p>
+                              <p>{order?.orderType}</p>
                             </div>
                           </TableCell>
                           <TableCell onClick={() => toggleOrderDetails(order._id)}>{formatCurrency(order.totalAmount)}</TableCell>
@@ -195,7 +196,7 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
                                         </p>
                                         <p className="text-xs flex items-center">
                                           <MapPin className="h-3 w-3 mr-2" />
-                                          {order?.table?.tableName||'NIL'}
+                                          {order?.orderType === 'dining' ? `${order?.table?.tableName}` : 'Percel'}
                                         </p>
                                       </div>
                                     </div>
