@@ -13,6 +13,7 @@ import axios from 'axios';
 import ProductCard from '@/components/waiter/ProductCard';
 import { useSelector } from 'react-redux';
 import TableCart from '@/components/waiter/TableCart';
+import TableCartWithOrderId from '@/components/waiter/TableCartWithOrderId';
 
 
 type Item = {
@@ -37,7 +38,7 @@ const Page = () => {
     const [loading, setLoading] = useState(true);
     const [isWaiter, setIsWaiter] = useState<boolean | null>(null);
     const encryptionKey: any = process.env.NEXT_PUBLIC_KEY;  
-    const { parcel } =useParams()
+    const { orderId } =useParams()
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const [ok, SetOk] = useState(true);
     const [items, setItems] = useState<Item[]>([]);
@@ -64,18 +65,12 @@ const Page = () => {
   useEffect(() => {
     checkTableId()
     fetchItems();
-    checkOrderId();
   }, []);
 
-  const checkOrderId = async () => {
-    const orderId = localStorage.getItem('orderId');
-    if (orderId) {
 
-    }
-  };
   const checkTableId = async () => {
   try {
-    if (parcel) {
+    if (orderId) {
       SetOk(true)
     }else{
       SetOk(false)
@@ -170,7 +165,7 @@ const Page = () => {
         </>
       )}
       {cart.length > 0 &&
-        <TableCart orderType={'parcel'} />}
+        <TableCartWithOrderId id={orderId} />}
     </Layout>
         </AdminLayout>
       ) : (
