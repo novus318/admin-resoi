@@ -16,6 +16,7 @@ import StaffResign from '@/components/staff/StaffResign';
 import PendingSalaries from '@/components/staff/PendingSalaries';
 import DownloadPayslip from '@/components/staff/DownloadPayslip';
 import AdvancePayments from '@/components/staff/AdvancePayments';
+import { Badge } from '@/components/ui/badge';
 
 interface Staff {
     _id: string,
@@ -187,10 +188,6 @@ const Page = withAuth(({ params }: any) => {
                 <p className='text-xs md:text-base'>{staff?.contactInfo?.phone}</p>
               </div>
               <div>
-                <p className="text-gray-500 font-medium text-xs md:text-base">Advance Payment</p>
-                <p className='text-xs md:text-base'>₹{staff?.advancePayment ? (staff?.advancePayment.toFixed(2)) : 0}</p>
-              </div>
-              <div>
                 <p className="text-gray-500 font-medium text-xs md:text-base">Contact email</p>
                 <p className='text-xs md:text-base'>{staff?.contactInfo?.email || 'NIL'}</p>
               </div>
@@ -201,29 +198,35 @@ const Page = withAuth(({ params }: any) => {
             </div>
           </div>
           <div className='space-y-4'>
-          <PendingSalaries id={pid} fetchStaffDetails={fetchStaffDetails} /> 
-          <AdvancePayments staff={staff}/>
           </div>
           <div className="bg-white rounded-lg border p-6">
             <p className="text-2xl font-bold mb-4">Payslips</p>
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Month</TableHead>
-                  <TableHead>Net Pay</TableHead>
-                  <TableHead>Download</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paySlips?.map((pay: any) => {
-                  const netPay = pay?.status === 'Paid' ? pay?.netPay : pay?.basicPay
+  <TableHeader>
+    <TableRow>
+      <TableHead>Payment Date</TableHead>
+      <TableHead>Amount</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead>Actions</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {paySlips?.map((pay: any) => {
+      const netPay = pay?.status === 'Paid' ? pay?.netPay : pay?.basicPay;
+      const formattedNetPay = Math.round(netPay).toLocaleString();
+      const formattedAmount = Math.round(pay?.amount).toLocaleString();
+      const paymentDate = new Date(pay?.paymentDate).toLocaleDateString(); // Format payment date
 
-                  const formattedNetPay = Math.round(netPay).toLocaleString();
-                  return (
-                    <TableRow key={pay?._id}>
-                      <TableCell>{format(pay?.salaryPeriod?.startDate, 'MMM yyyy')}</TableCell>
-                      <TableCell>₹{formattedNetPay}</TableCell>
-                      <TableCell>
+      return (
+        <TableRow key={pay?._id}>
+          <TableCell>{paymentDate}</TableCell>
+          <TableCell>₹{formattedAmount}</TableCell>
+          <TableCell>
+            <Badge variant={pay?.status === 'Paid' ? 'default' : pay?.status === 'Pending' ? 'secondary' : 'destructive'}>
+              {pay?.status}
+            </Badge>
+          </TableCell>
+          <TableCell>
                         {pay?.status === 'Paid' ? (
                           <DownloadPayslip payslip={pay} staff={staff} />
                         ) : (
@@ -234,16 +237,18 @@ const Page = withAuth(({ params }: any) => {
                           </div>
                         )}
                       </TableCell>
-                    </TableRow>
-                  )
-                })}
-                {paySlips?.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3}>No payslips found.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+        </TableRow>
+      );
+    })}
+    {paySlips?.length === 0 && (
+      <TableRow>
+        <TableCell colSpan={5} className="text-center">
+          No payslips found.
+        </TableCell>
+      </TableRow>
+    )}
+  </TableBody>
+</Table>
           </div>
         </div>
       </div>

@@ -101,9 +101,9 @@ const Create = () => {
             });
             isValid = false;
         }
-        if (!formData.price && formData.variants.length === 0) {
+        if (!formData.price && formData.variants.length === 0 || formData.price && formData.variants.length > 0) {
             toast({
-                title: "Please fill item price or add variants",
+                title: "Please fill either item price or add variants, but not both",
                 variant: "destructive",
             });
             isValid = false;

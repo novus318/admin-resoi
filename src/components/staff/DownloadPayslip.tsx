@@ -5,153 +5,155 @@ import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
 
-const DownloadPayslip = ({ payslip, staff }: any) => {
-  const formatDate = (dateString: string) => {
-    return {
-      dayMonthYear: format(new Date(dateString), 'dd MMM yyyy'),
-      day: format(new Date(dateString), 'EEEE'),
-    };
-  };
+// Register Roboto font
+Font.register({
+  family: 'Roboto',
+  src: 'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf',
+});
 
-  Font.register({
-    family: 'Roboto',
-    src: 'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf'
-  });
-
-  const handlePayslipClick = async () => {
-
- const formatCurrency = (amount:any) => {
+// Currency formatting function
+const formatCurrency = (amount: number) => {
   return `₹${amount.toLocaleString('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
 };
 
-    const doc = (
-      <Document>
-        <Page size="A5" style={styles.page}>
+// Date formatting function
+const formatDate = (dateString: string) => {
+  return {
+    dayMonthYear: format(new Date(dateString), 'dd MMM yyyy'),
+    day: format(new Date(dateString), 'EEEE'),
+  };
+};
 
-          {/* Header Section with Logo */}
-          <View style={styles.header}>
-            <Image src='/logo.svg' style={styles.logo} />
-            {/* <Text style={styles.headerText}>Reg. No: 1/88 K.W.B. Reg.No.A2/135/RA</Text>
-            <Text style={styles.headerText}>VELLAP, P.O. TRIKARIPUR-671310, KASARGOD DIST</Text>
-            <Text style={styles.headerText}>Phone: +91 9876543210</Text> */}
+const DownloadPayslip = ({ payslip, staff }: any) => {
+  const handlePayslipClick = async () => {
+    try {
+      const doc = (
+        <Document>
+          <Page size="A5" style={styles.page}>
+            {/* Header Section with Logo */}
+            <View style={styles.header}>
+              <Image src="/logo.png" style={styles.logo} />
+              <Text style={styles.headerText}>16/745, Main Road, Opp. Ramraj Petrol Pump (Bharat Petroleum)</Text>
+              <Text style={styles.headerText}>Perumba Payyannur</Text>
+              <Text style={styles.headerText}>Phone: +91 8281930611</Text>
+              <View style={styles.separator} />
+            </View>
+
+            {/* Employee Details */}
+            <View style={styles.infoSection}>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Employee Name:</Text>
+                <Text style={styles.infoValue}>{staff?.name || 'N/A'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Employee ID:</Text>
+                <Text style={styles.infoValue}>{staff?.employeeId || 'N/A'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Phone:</Text>
+                <Text style={styles.infoValue}>{staff?.contactInfo?.phone || 'N/A'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Department:</Text>
+                <Text style={styles.infoValue}>{staff?.department || 'N/A'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Position:</Text>
+                <Text style={styles.infoValue}>{staff?.position || 'N/A'}</Text>
+              </View>
+            </View>
+
             <View style={styles.separator} />
-          </View>
 
-          {/* Employee Details */}
-          <View style={styles.infoSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Employee Name:</Text>
-              <Text style={styles.infoValue}>{staff.name}</Text>
+            {/* Payslip Information */}
+            <View style={styles.infoSection}>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Join Date:</Text>
+                <Text style={styles.infoValue}>{staff?.joinDate ? formatDate(staff.joinDate).dayMonthYear : 'N/A'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Payment Date:</Text>
+                <Text style={styles.infoValue}>
+                  {payslip?.paymentDate
+                    ? format(new Date(payslip.paymentDate), 'dd MMM yyyy')
+                    : 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Status:</Text>
+                <Text style={styles.infoValue}>{payslip?.status || 'N/A'}</Text>
+              </View>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Employee ID:</Text>
-              <Text style={styles.infoValue}>{staff.employeeId}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Phone:</Text>
-              <Text style={styles.infoValue}>{staff.contactInfo.phone}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Department:</Text>
-              <Text style={styles.infoValue}>{staff.department}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Position:</Text>
-              <Text style={styles.infoValue}>{staff.position}</Text>
-            </View>
-          </View>
 
-          <View style={styles.separator} />
+            <View style={styles.separator} />
 
-          {/* Payslip Information */}
-          <View style={styles.infoSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Join Date:</Text>
-              <Text style={styles.infoValue}>{formatDate(staff.joinDate).dayMonthYear}</Text>
+            {/* Net Pay Highlighted */}
+            <View style={styles.totalSection}>
+              <Text style={styles.totalText}>Net Pay: {formatCurrency(payslip?.amount || 0)}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Salary Period:</Text>
-              <Text style={styles.infoValue}>{format(new Date(payslip.salaryPeriod.startDate), 'MMM yyyy')}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Total salary:</Text>
-              <Text style={styles.infoValue}>{formatCurrency(payslip.basicPay)}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Advance Deduction:</Text>
-              <Text style={styles.infoValue}>{formatCurrency(payslip.advanceDeduction)}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>On Leave Days:</Text>
-              <Text style={styles.infoValue}>{payslip.onleave.days}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Leave Deduction:</Text>
-              <Text style={styles.infoValue}>{formatCurrency(payslip.onleave.deductAmount)}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Status:</Text>
-              <Text style={styles.infoValue}>{payslip.status}</Text>
-            </View>
-          </View>
 
-          <View style={styles.separator} />
+            <View style={styles.separator} />
 
-          {/* Net Pay Highlighted */}
-          <View style={styles.totalSection}>
-            <Text style={styles.totalText}>Net Pay: {formatCurrency(payslip.netPay)}</Text>
-          </View>
+            {/* Footer Section */}
+            <View style={styles.footer}>
+              <Text style={styles.regards}>Regards,</Text>
+              <Text style={styles.signature}>Malabar Resoi</Text>
+            </View>
+          </Page>
+        </Document>
+      );
 
-          <View style={styles.separator} />
-
-          {/* Footer Section */}
-          <View style={styles.footer}>
-            <Text style={styles.regards}>Regards,</Text>
-            <Text style={styles.signature}>Malabar Resoi</Text>
-          </View>
-        </Page>
-      </Document>
-    );
-
-    const blob = await pdf(doc).toBlob();
-    saveAs(blob, `Payslip-${staff.employeeId}-${format(new Date(payslip.salaryPeriod.startDate), 'MMM yyyy')}.pdf`);
+      // Generate PDF and save it
+      const blob = await pdf(doc).toBlob();
+      saveAs(
+        blob,
+        `Payslip-${staff?.employeeId || 'Unknown'}-${format(
+          new Date(payslip?.salaryPeriod?.startDate || new Date()),
+          'MMM yyyy'
+        )}.pdf`
+      );
+    } catch (error) {
+      console.error('Error generating payslip:', error);
+      alert('Failed to generate payslip. Please try again.');
+    }
   };
 
+  // Styles for the PDF
   const styles = StyleSheet.create({
     page: {
-      padding: 10,  // Reduced padding for less spacing
+      padding: 10,
       fontFamily: 'Roboto',
       fontSize: 12,
-      lineHeight: 1.5,  // Adjusted line height for more compact text
+      lineHeight: 1.5,
       backgroundColor: '#F3F4F6',
     },
     header: {
       textAlign: 'center',
-      marginBottom: 8,  // Reduced margin for less space between elements
+      marginBottom: 8,
     },
     headerText: {
       fontSize: 10,
-      marginBottom: 2,  // Reduced margin for tighter layout
+      marginBottom: 2,
+      color: '#4B5563',
     },
     logo: {
-      width: 50,
       height: 50,
       alignSelf: 'center',
     },
     separator: {
-      borderBottom: '1px solid #D1D5DB',  // Reduced separator thickness
-      marginVertical: 8,  // Reduced vertical margin
+      borderBottom: '1px solid #D1D5DB',
+      marginVertical: 8,
     },
     infoSection: {
-      marginVertical: 8,  // Reduced margin between sections
+      marginVertical: 8,
     },
     infoRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 4,  // Reduced spacing between rows
+      marginBottom: 4,
     },
     infoLabel: {
       fontSize: 10,
@@ -172,11 +174,11 @@ const DownloadPayslip = ({ payslip, staff }: any) => {
       color: '#111827',
     },
     footer: {
-      marginTop: 15,  // Reduced top margin
+      marginTop: 15,
       fontSize: 10,
     },
     regards: {
-      marginBottom: 4,  // Reduced space before signature
+      marginBottom: 4,
     },
     signature: {
       fontWeight: 'bold',
@@ -186,8 +188,8 @@ const DownloadPayslip = ({ payslip, staff }: any) => {
   });
 
   return (
-    <Button onClick={handlePayslipClick} size='sm'>
-      <Download className='h-4' />
+    <Button onClick={handlePayslipClick} size="sm">
+      <Download className="h-4" />
       Download
     </Button>
   );

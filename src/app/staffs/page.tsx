@@ -78,9 +78,6 @@ const Staffs = () => {
         <div className="mb-4 grid grid-cols-2 md:grid-cols-5 justify-between items-center">
           <h2 className="text-2xl font-semibold col-span-2 md:col-span-3">Staff Management</h2>
           <div className='space-x-2 col-span-2'>
-            <Link href='/staffs/pending-salaries' className='bg-primary text-primary-foreground py-1 px-2 rounded-sm'>
-              Pending salary
-            </Link>
             <Link href='/staffs/create-staff' className='bg-primary text-primary-foreground py-1 px-2 rounded-sm'>
               Create staff
             </Link>
