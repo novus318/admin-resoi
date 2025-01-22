@@ -24,6 +24,7 @@ import { formatCurrency } from "@/lib/currencyFormat";
 import { format } from "date-fns";
 import OnlineOrdersToggle from "./OnlineOrdersToggle";
 import ChangeOnlineStatus from "./ChangeOnlineStatus";
+import PrintOrder from "./PrintOrder";
 
 interface User {
   name: string;
@@ -195,6 +196,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
                                   </div>
                                   <div>
                                     <h3 className="font-semibold mb-2">Order Summary</h3>
+                                    <PrintOrder order={order}/>
                                     <div className="space-y-1 text-xs">
                                       <p>Payment: {order?.paymentMethod} - {order?.paymentStatus}</p>
                                       <p>Total Amount: {formatCurrency(order.totalAmount)}</p>

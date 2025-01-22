@@ -22,6 +22,7 @@ import { Search, MapPin, Phone, User } from 'lucide-react';
 import { formatCurrency } from "@/lib/currencyFormat";
 import { format } from "date-fns";
 import ChangeTableStatus from "./ChangeTableStatus";
+import PrintOrder from "./PrintOrder";
 
 interface User {
   name: string;
@@ -184,6 +185,7 @@ const RecentStoreOrders:React.FC<RecentOrdersProps> = ({
                                 <CardContent className="p-4">
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
+                                    <PrintOrder order={order}/>
                                       <h3 className="font-semibold mb-2">Customer Details</h3>
                                       <div className="space-y-1">
                                         <p className="text-xs flex items-center">
