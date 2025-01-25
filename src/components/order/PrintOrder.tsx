@@ -1,8 +1,10 @@
-import React from 'react';
-import { Button } from '../ui/button';
-import { Printer } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "../ui/button";
+import { Printer } from "lucide-react";
 
 const PrintOrder = ({ order }: any) => {
+  const [message, setMessage] = useState(""); // State to manage success/error messages
+
   const handlePrint = async () => {
     // Prepare the JSON data for printing
     const printData = [
@@ -43,14 +45,14 @@ const PrintOrder = ({ order }: any) => {
       },
       {
         type: 0, // Text
-        content: '--------------------------------',
+        content: "--------------------------------",
         bold: 0, // Not bold
         align: 0, // Left
         format: 0, // Normal
       },
       {
         type: 0, // Text
-        content: 'Cart Items:',
+        content: "Cart Items:",
         bold: 1, // Bold
         align: 1, // Center
         format: 0, // Normal
@@ -64,7 +66,7 @@ const PrintOrder = ({ order }: any) => {
       })),
       {
         type: 0, // Text
-        content: '--------------------------------',
+        content: "--------------------------------",
         bold: 0, // Not bold
         align: 0, // Left
         format: 0, // Normal
@@ -78,24 +80,55 @@ const PrintOrder = ({ order }: any) => {
       },
     ];
 
-    // Convert the print data to JSON
-    const jsonData = JSON.stringify(printData, null, 2);
+    try {
+      // Convert the print data to JSON
+      const jsonData = JSON.stringify(printData);
 
-    // Create a Blob with the JSON data
-    const blob = new Blob([jsonData], { type: 'application/json' });
+      // Create a Blob with the JSON data
+      const blob = new Blob([jsonData], { type: "application/json" });
 
-    // Create a URL for the Blob
-    const url = URL.createObjectURL(blob);
+      // Create a URL for the Blob
+      const blobUrl = URL.createObjectURL(blob);
 
-    // Open the Bluetooth Print app with the JSON data
-    window.location.href = `my.bluetoothprint.scheme://${url}`;
+      // Construct the print URL using the Bluetooth Print app scheme
+      const printUrl = `my.bluetoothprint.scheme://https://server.malabarresoi.in/api/online/get-online/ordersToday`;
+
+      // Redirect to the print URL
+      window.location.href = printUrl;
+
+      // Display success message
+      setMessage("Print request sent successfully!");
+    } catch (error:any) {
+      // Display error message
+      setMessage(`Error sending print request: ${error.message}`);
+    }
   };
 
   return (
-    <Button onClick={handlePrint}>
-      <Printer />
-      Print Order
-    </Button>
+    <div>
+      <Button onClick={handlePrint}>
+        <Printer />
+        Print Order
+      </Button>
+
+      {/* Display success/error messages below the button */}
+      {message && (
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            backgroundColor: message.includes("Error") ? "#ffebee" : "#e8f5e9",
+            color: message.includes("Error") ? "#c62828" : "#2e7d32",
+            borderRadius: "5px",
+            border: `1px solid ${
+              message.includes("Error") ? "#c62828" : "#2e7d32"
+            }`,
+          }}
+        >
+          {message}
+        </div>
+      )}
+    </div>
   );
 };
 
