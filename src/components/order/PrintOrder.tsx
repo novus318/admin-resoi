@@ -6,92 +6,10 @@ const PrintOrder = ({ order }: any) => {
   const [message, setMessage] = useState(""); // State to manage success/error messages
 
   const handlePrint = async () => {
-    // Prepare the JSON data for printing
-    const printData = [
-      {
-        type: 0, // Text
-        content: `Order ID: ${order.orderId}`,
-        bold: 1, // Bold
-        align: 1, // Center
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: `User Type: ${order.userType}`,
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: `Payment Status: ${order.paymentStatus}`,
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: `Order Status: ${order.status}`,
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: `Order Type: ${order.orderType}`,
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: "--------------------------------",
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: "Cart Items:",
-        bold: 1, // Bold
-        align: 1, // Center
-        format: 0, // Normal
-      },
-      ...order.cartItems.map((item: any) => ({
-        type: 0, // Text
-        content: `${item.name} (${item.variant}) - ${item.quantity} x ₹${item.price}`,
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      })),
-      {
-        type: 0, // Text
-        content: "--------------------------------",
-        bold: 0, // Not bold
-        align: 0, // Left
-        format: 0, // Normal
-      },
-      {
-        type: 0, // Text
-        content: `Total Amount: ₹${order.totalAmount}`,
-        bold: 1, // Bold
-        align: 2, // Right
-        format: 0, // Normal
-      },
-    ];
-
     try {
-      // Convert the print data to JSON
-      const jsonData = JSON.stringify(printData);
-
-      // Create a Blob with the JSON data
-      const blob = new Blob([jsonData], { type: "application/json" });
-
-      // Create a URL for the Blob
-      const blobUrl = URL.createObjectURL(blob);
 
       // Construct the print URL using the Bluetooth Print app scheme
-      const printUrl = `my.bluetoothprint.scheme://https://server.malabarresoi.in/api/online/get-online/ordersToday`;
+      const printUrl = `my.bluetoothprint.scheme://https://server.malabarresoi.in/api/print/get-order/679545eeca8e4346fea09048`;
 
       // Redirect to the print URL
       window.location.href = printUrl;
