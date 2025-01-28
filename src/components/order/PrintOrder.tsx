@@ -9,7 +9,7 @@ const PrintOrder = ({ order }: any) => {
     try {
 
       // Construct the print URL using the Bluetooth Print app scheme
-      const printUrl = `my.bluetoothprint.scheme://https://server.malabarresoi.in/api/print/get-order/679545eeca8e4346fea09048`;
+      const printUrl = `my.bluetoothprint.scheme://https://server.malabarresoi.in/api/print/get-order/${order._id}`;
 
       // Redirect to the print URL
       window.location.href = printUrl;
@@ -24,7 +24,7 @@ const PrintOrder = ({ order }: any) => {
 
   return (
     <div>
-      <Button onClick={handlePrint}>
+      <Button size='sm' onClick={handlePrint}>
         <Printer />
         Print Order
       </Button>
@@ -33,8 +33,8 @@ const PrintOrder = ({ order }: any) => {
       {message && (
         <div
           style={{
-            marginTop: "10px",
-            padding: "10px",
+            marginTop: "5px",
+            padding: "5px",
             backgroundColor: message.includes("Error") ? "#ffebee" : "#e8f5e9",
             color: message.includes("Error") ? "#c62828" : "#2e7d32",
             borderRadius: "5px",
@@ -51,3 +51,4 @@ const PrintOrder = ({ order }: any) => {
 };
 
 export default PrintOrder;
+

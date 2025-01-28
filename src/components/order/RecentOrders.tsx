@@ -196,13 +196,13 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({
                                   </div>
                                   <div>
                                     <h3 className="font-semibold mb-2">Order Summary</h3>
-                                    <PrintOrder order={order}/>
                                     <div className="space-y-1 text-xs">
                                       <p>Payment: {order?.paymentMethod} - {order?.paymentStatus}</p>
                                       <p>Total Amount: {formatCurrency(order.totalAmount)}</p>
                                       <p>Status: {order.status}</p>
                                     </div>
                                   </div>
+                                  <PrintOrder order={order}/>
                                 </div>
                                 <h3 className="font-semibold mb-2">Order Items</h3>
                                 <div className="space-y-2">
