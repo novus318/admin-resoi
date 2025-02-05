@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, Clock, X, Loader2, Clock1, Clock3 } from 'lucide-react'
+import { Clock, X, Loader2, Clock1, Clock3, Check } from 'lucide-react'
 import axios from 'axios'
 import { Button } from "@/components/ui/button"
 import {
@@ -12,22 +12,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { toast } from '@/hooks/use-toast'
 
-const ChangeTableStatusWaiter =({ order,
-    refreshOrders,
-    refreshAssets
- }: any) =>{
-    const [status, setStatus] = useState(order.status)
-    const [loading, setLoading] = useState(false)
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL
-    const statusConfig: any = {
-        'pending': { label: 'Pending', icon: Clock1, color: 'text-primary' },
-        'confirmed': { label: 'Confirmed', icon: Clock, color: 'text-yellow-600' },
-        'in-progress': { label: 'In Progress', icon: Clock3, color: 'text-blue-600' },
-        'cancelled': { label: 'Cancelled', icon: X, color: 'text-red-600' },
-      }
+const ChangeTableStatusWaiter = ({ order,
+  refreshOrders,
+  refreshAssets
+}: any) => {
+  const [status, setStatus] = useState(order.status)
+  const [loading, setLoading] = useState(false)
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  const statusConfig: any = {
+    'pending': { label: 'Pending', icon: Clock1, color: 'text-primary' },
+    'confirmed': { label: 'Confirmed', icon: Clock, color: 'text-yellow-600' },
+    'in-progress': { label: 'In Progress', icon: Clock3, color: 'text-blue-600' },
+    'cancelled': { label: 'Cancelled', icon: X, color: 'text-red-600' },
+    'completed': { label: 'Completed', icon: Check, color: 'text-green-600' },
+  }
 
-      const handleStatusChange = async (newStatus: 'pending' | 'confirmed' | 'in-progress' | 'cancelled') => {
-        setLoading(true)
+  const handleStatusChange = async (newStatus: 'pending' | 'confirmed' | 'in-progress' | 'cancelled') => {
+    setLoading(true)
     try {
       const response = await axios.put(`${apiUrl}/api/tableOrder/update/table-order-status/${order.orderId}`, {
         status: newStatus,
@@ -36,25 +37,26 @@ const ChangeTableStatusWaiter =({ order,
       if (response.data.success) {
         setStatus(newStatus)
         refreshOrders()
-        if(refreshAssets){
+        if (refreshAssets) {
           refreshAssets()
         }
       }
-    } catch (error:any) {
+    } catch (error: any) {
       toast({
-       title: 'Failed to update status',
-       variant: 'destructive',
-       description: error?.response?.data?.message || error.message || 'Something went wrong.',
+        title: 'Failed to update status',
+        variant: 'destructive',
+        description: error?.response?.data?.message || error.message || 'Something went wrong.',
       })
     } finally {
       setLoading(false)
     }
   }
 
-  const CurrentStatusIcon = statusConfig[status].icon
+  const CurrentStatusIcon = statusConfig[status]?.icon
+
 
   const getAvailableStatuses = () => {
-    if (status === 'pending') return ['confirmed','in-progress', 'cancelled']
+    if (status === 'pending') return ['confirmed', 'in-progress', 'cancelled']
     if (status === 'confirmed') return ['in-progress', 'cancelled']
     return []
   }
@@ -93,4 +95,4 @@ const ChangeTableStatusWaiter =({ order,
   )
 }
 
-export default ChangeTableStatusWaiter
+export default ChangeTableStatusWaiter;
