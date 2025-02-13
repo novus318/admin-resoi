@@ -126,6 +126,18 @@ const isWaiter =decryptedRole === 'waiter'
           </li>}
           {isAdmin && <>
             <li className="mb-4 transition duration-300 ease-in-out transform hover:scale-105">
+            <Link href="/waiter-order">
+              <div
+                className={`flex items-center py-1 px-2 rounded-md  hover:bg-primary hover:text-primary-foreground  ${
+                  CurrentPage('/waiter-order') ? 'bg-secondary text-secondary-foreground': 'bg-primary text-primary-foreground'
+                }`}
+              >
+                <PlusSquareIcon className="mr-3" />
+                <span className="text-lg">Take Order</span>
+              </div>
+            </Link>
+          </li>
+            <li className="mb-4 transition duration-300 ease-in-out transform hover:scale-105">
             <Link href="/orders">
               <div
                 className={`flex items-center py-1 px-2 rounded-md  hover:bg-primary hover:text-primary-foreground  ${

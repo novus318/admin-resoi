@@ -53,7 +53,7 @@ const Page = () => {
         if (storedEncryptedRole) {
           const bytes = CryptoJS.AES.decrypt(storedEncryptedRole, encryptionKey);
           const decryptedRole = bytes.toString(CryptoJS.enc.Utf8);
-          setIsWaiter(decryptedRole === 'waiter');
+          setIsWaiter(decryptedRole === 'waiter' || decryptedRole === 'admin');
         } else {
           setIsWaiter(false);
         }
