@@ -29,6 +29,7 @@ import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/currencyFormat';
 import ChangeTableStatusWaiter from './waiter/ChangeTableStatusWaiter';
 import Link from 'next/link';
+import PrintOrder from './order/PrintOrder';
 
 
 interface User {
@@ -286,6 +287,7 @@ try {
                                     </div>
                                   </div>
                                 </div>
+                                <PrintOrder order={order}/>
                                 <Link href={`/waiter-order/edit/${order.orderId}`}
                                   className='bg-primary text-secondary font-medium py-1 px-2 rounded-md'>
                                   Add items
